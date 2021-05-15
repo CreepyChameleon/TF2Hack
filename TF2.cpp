@@ -14,8 +14,8 @@ int main()
 	HANDLE hProcess = 0;
 
 	uintptr_t moduleBase = 0, localPlayerPtr = 0, animAddr = 0;
-	bool bHealth = false, bAmmo = false, bRecoil = false;
 
+	int baseAnim = 34;
 	int animValue;
 
 	DWORD procId = GetProcId(L"hl2.exe"); //get process id from name of window
@@ -32,6 +32,7 @@ int main()
 		animAddr = FindDMAAddy(hProcess, localPlayerPtr, { 0x4, 0x0, 0x4e8, 0xf4 });
 
 		mem::PullEx((BYTE*)animAddr, (BYTE*)&animValue, sizeof(animValue), hProcess);
+		baseAnim = animValue;
 
 		std::cout << "Anim is currently: " << animValue;
 	}
@@ -44,12 +45,15 @@ int main()
 
 	DWORD dwExit = 0;
 
+	HWND wnd;
+	HDC dc;
+
+	bool isStab = false;
 	while (GetExitCodeProcess(hProcess, &dwExit) && dwExit == STILL_ACTIVE)
 	{
-		if (animValue == 39)
+		//low-latency hacks
+		if (animValue == baseAnim + 5 && isStab == false) //have early so no delay between stab
 		{
-			std::cout << "kill" << std::endl;
-
 			INPUT Inputs[2] = { 0 };
 
 			Inputs[0].type = INPUT_MOUSE;
@@ -59,18 +63,47 @@ int main()
 			Inputs[1].mi.dwFlags = MOUSEEVENTF_LEFTUP;
 
 			SendInput(2, Inputs, sizeof(INPUT));
-
+			isStab = true;
+		}
+		else
+		{
+			if (animValue != baseAnim + 5)
+			{
+				isStab = false;
+			}
 		}
 		
+		//draw to screen
+		
+		
+		/*wnd = GetForegroundWindow();
+
+		dc = GetDC(wnd);
+
+		Rectangle(dc, 0, 0, 200, 200);
+		TextOut(dc, 10, 10, TEXT("Test sentence"), 16);
+		ReleaseDC(wnd, dc);*/
+
+
 		if (GetAsyncKeyState(VK_NUMPAD5) & 1)
 		{
 			return 0; //exits hack
 		}
 
-		mem::PullEx((BYTE*)animAddr, (BYTE*)&animValue, sizeof(animValue), hProcess);
-		std::cout << "Anim is currently: " << animValue << std::endl;
+		if (GetAsyncKeyState(VK_NUMPAD0) & 1)
+		{
+			moduleBase = GetModuleBaseAddress(procId, L"client.dll");
+			localPlayerPtr = moduleBase + 0x00C614BC;
+			animAddr = FindDMAAddy(hProcess, localPlayerPtr, { 0x4, 0x0, 0x4e8, 0xf4 });
 
-		//Sleep(10); //sleeps for 10ms
+			mem::PullEx((BYTE*)animAddr, (BYTE*)&animValue, sizeof(animValue), hProcess);
+			baseAnim = animValue;
+			std::cout << "Anim is currently: " << animValue << std::endl;
+		}
+
+		mem::PullEx((BYTE*)animAddr, (BYTE*)&animValue, sizeof(animValue), hProcess);
+
+		Sleep(10); //sleeps for 10ms
 	}
 
 	std::cout << "Process not found, press enter to exit\n";

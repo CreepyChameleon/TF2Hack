@@ -19,6 +19,9 @@
     <Filter Include="proc">
       <UniqueIdentifier>{ff699fa7-9879-4008-90d1-0cb5c9c486c4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="draw">
+      <UniqueIdentifier>{b115ea0a-f31c-4521-9d98-9898cec2b3dc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -29,6 +32,9 @@
     </ClInclude>
     <ClInclude Include="proc.h">
       <Filter>proc</Filter>
+    </ClInclude>
+    <ClInclude Include="draw.h">
+      <Filter>draw</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -43,6 +49,9 @@
     </ClCompile>
     <ClCompile Include="proc.cpp">
       <Filter>proc</Filter>
+    </ClCompile>
+    <ClCompile Include="draw.cpp">
+      <Filter>draw</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
